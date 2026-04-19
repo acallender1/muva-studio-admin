@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#d4a5a5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Muva Admin">
+    <link rel="manifest" href="manifest.json">
+    <title>Muva Studio - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f5f1ed; color: #2d2a28; }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-screen {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #d4a5a5 0%, #9b7fa1 100%);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-screen.show { display: flex; }
+
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-logo h1 {
+            font-family: 'Cormorant', serif;
+            font-size: 36px;
+            color: #d4a5a5;
+            margin-bottom: 4px;
+        }
+
+        .login-logo p {
+            font-size: 13px;
+            color: #6b6b6b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #2d2a28;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+            background: #faf8f6;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #d4a5a5;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(212,165,165,0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #d4a5a5, #9b7fa1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            min-height: 50px;
+        }
+
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,165,165,0.4); }
+        .login-btn:active { transform: translateY(0); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .login-error {
+            background: #ffcdd2;
+            border: 1px solid #f44336;
+            color: #b71c1c;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .login-error.show { display: block; }
+
+        .login-attempts {
+            text-align: center;
+            font-size: 12px;
+            color: #6b6b6b;
+            margin-top: 16px;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-screen { display: none; }
+        .dashboard-screen.show { display: block; }
+
+        .header {
+            background: linear-gradient(135deg, #d4a5a5, #9b7fa1);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header h1 { font-family: 'Cormorant', serif; font-size: 24px; font-weight: 700; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+
+        .offline-badge { background: rgba(0,0,0,0.3); color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; display: none; }
+        .offline-badge.show { display: block; }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.25);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.5);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.4); }
+
+        .layout { display: grid; grid-template-columns: 210px 1fr; min-height: calc(100vh - 58px); }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+            position: sticky;
+            top: 58px;
+            height: calc(100vh - 58px);
+            overflow-y: auto;
+        }
+
+        .nav { list-style: none; }
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            color: #2d2a28;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+        .nav a:hover { background: #f5f1ed; color: #d4a5a5; }
+        .nav a.active { background: #f5f1ed; color: #d4a5a5; border-left-color: #d4a5a5; font-weight: 600; }
+
+        .content { padding: 28px; overflow-y: auto; }
+        .page-title { font-family: 'Cormorant', serif; font-size: 32px; margin-bottom: 24px; color: #d4a5a5; font-weight: 700; }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+        .stat-num { font-size: 34px; font-weight: 700; color: #d4a5a5; margin-bottom: 4px; }
+        .stat-label { font-size: 11px; color: #6b6b6b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        .table-wrap { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 28px; }
+        .table-head { background: #d4a5a5; color: white; padding: 14px 20px; display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 1.2fr; gap: 12px; font-weight: 600; font-size: 13px; }
+        .table-row { padding: 14px 20px; border-bottom: 1px solid #f0ebe6; display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 1.2fr; gap: 12px; align-items: center; font-size: 13px; transition: background 0.15s ease; }
+        .table-row:last-child { border: none; }
+        .table-row:hover { background: #faf8f6; }
+        .table-empty { padding: 40px; text-align: center; color: #6b6b6b; font-size: 14px; }
+        .table-loading { padding: 40px; text-align: center; color: #d4a5a5; }
+
+        .status { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: rgba(255,183,77,0.2); color: #f57f17; }
+        .status-confirmed { background: rgba(76,175,80,0.2); color: #388e3c; }
+        .status-completed { background: rgba(103,141,197,0.2); color: #1565c0; }
+        .status-cancelled { background: rgba(244,67,54,0.2); color: #d32f2f; }
+
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Poppins', sans-serif; min-height: 30px; }
+        .btn-yes { background: #4caf50; color: white; }
+        .btn-yes:hover { background: #388e3c; }
+        .btn-no { background: #f44336; color: white; }
+        .btn-no:hover { background: #d32f2f; }
+        .btn-primary { background: #d4a5a5; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; font-size: 14px; }
+        .btn-primary:hover { background: #a67878; transform: translateY(-1px); }
+        .btn-remove { background: #f44336; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+        .btn-remove:hover { background: #d32f2f; }
+
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .card h3 { font-family: 'Cormorant', serif; font-size: 20px; color: #d4a5a5; margin-bottom: 16px; font-weight: 700; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
+        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; }
+        .form-group input:focus { outline: none; border-color: #d4a5a5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .service-list { display: grid; gap: 10px; }
+        .service-item { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 14px; border: 1px solid #e0e0e0; border-radius: 10px; gap: 12px; transition: background 0.15s ease; }
+        .service-item:hover { background: #faf8f6; }
+        .service-item strong { display: block; color: #d4a5a5; margin-bottom: 3px; font-size: 14px; }
+        .service-item p { font-size: 12px; color: #6b6b6b; }
+
+        .hours-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .hour-item { padding: 14px; border: 1px solid #e0e0e0; border-radius: 10px; }
+        .hour-item > label { font-weight: 600; margin-bottom: 10px; display: block; font-size: 13px; color: #2d2a28; }
+        .hour-inputs { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #6b6b6b; }
+        .hour-inputs input { flex: 1; padding: 6px 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 12px; min-width: 0; }
+        .closed-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+        .closed-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: #d4a5a5; }
+        .closed-row label { font-size: 12px; color: #6b6b6b; margin: 0; font-weight: 400; }
+
+        .tab { display: none; }
+        .tab.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            border-left: 4px solid #4caf50;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: none;
+            font-size: 14px;
+            z-index: 9999;
+            max-width: 320px;
+            animation: slideInRight 0.3s ease;
+        }
+        .toast.error { border-left-color: #f44336; }
+        .toast.show { display: block; }
+        @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .install-banner {
+            display: none;
+            background: linear-gradient(135deg, #d4a5a5, #9b7fa1);
+            color: white;
+            padding: 10px 20px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+        .install-banner.show { display: flex; }
+        .install-btn { background: white; color: #d4a5a5; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; }
+        .install-dismiss { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .table-head, .table-row { grid-template-columns: 1fr 1fr; font-size: 12px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div class="login-screen show" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">
+                <h1>Muva Studio</h1>
+                <p>Owner Dashboard</p>
+            </div>
+
+            <div class="login-error" id="loginError">Incorrect username or password. Please try again.</div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter') login()">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()">
+                </div>
+                <button class="login-btn" id="loginBtn" onclick="login()">Sign In</button>
+            </div>
+            <p class="login-attempts" id="attemptsMsg"></p>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD SCREEN ===== -->
+    <div class="dashboard-screen" id="dashboardScreen">
+
+        <div class="install-banner" id="installBanner">
+            <span>Install Muva Admin for quick access</span>
+            <button class="install-btn" id="installBtn">Install</button>
+            <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+        </div>
+
+        <div class="header">
+            <div class="header-left">
+                <h1>Muva Admin</h1>
+                <span class="offline-badge" id="offlineBadge">Offline</span>
+            </div>
+            <div class="header-right">
+                <span id="welcomeUser" style="font-size: 13px; opacity: 0.9;"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <ul class="nav">
+                    <li><a class="active" onclick="switchTab('dashboard', this)">📊 Dashboard</a></li>
+                    <li><a onclick="switchTab('appointments', this)">📅 Appointments</a></li>
+                    <li><a onclick="switchTab('services', this)">💄 Services</a></li>
+                    <li><a onclick="switchTab('hours', this)">⏰ Hours</a></li>
+                </ul>
+            </aside>
+
+            <main class="content">
+
+                <!-- DASHBOARD TAB -->
+                <div id="dashboard" class="tab active">
+                    <h2 class="page-title">Dashboard</h2>
+                    <div class="stats">
+                        <div class="stat"><div class="stat-num" id="statPending">—</div><div class="stat-label">Pending</div></div>
+                        <div class="stat"><div class="stat-num" id="statConfirmed">—</div><div class="stat-label">Confirmed</div></div>
+                        <div class="stat"><div class="stat-num" id="statRevenue">—</div><div class="stat-label">Revenue</div></div>
+                        <div class="stat"><div class="stat-num" id="statClients">—</div><div class="stat-label">Clients</div></div>
+                    </div>
+                    <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Recent Bookings</h3>
+                    <div class="table-wrap">
+                        <div class="table-head">
+                            <div>Client</div><div>Services</div><div>Date & Time</div><div>Status</div><div>Action</div>
+                        </div>
+                        <div id="dashboardRows"><div class="table-loading">Loading...</div></div>
+                    </div>
+                </div>
+
+                <!-- APPOINTMENTS TAB -->
+                <div id="appointments" class="tab">
+                    <h2 class="page-title">All Appointments</h2>
+                    <div class="table-wrap">
+                        <div class="table-head">
+                            <div>Client</div><div>Services</div><div>Date & Time</div><div>Status</div><div>Action</div>
+                        </div>
+                        <div id="appointmentsRows"><div class="table-loading">Loading...</div></div>
+                    </div>
+                </div>
+
+                <!-- SERVICES TAB -->
+                <div id="services" class="tab">
+                    <h2 class="page-title">Manage Services</h2>
+                    <div class="card">
+                        <h3>Add New Service</h3>
+                        <div class="form-group">
+                            <label>Service Name</label>
+                            <input type="text" id="srvName" placeholder="e.g., Bridal Makeup">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Price ($)</label>
+                                <input type="number" id="srvPrice" placeholder="150">
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (min)</label>
+                                <input type="number" id="srvDur" placeholder="120">
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="addService()">Add Service</button>
+                    </div>
+                    <div class="card">
+                        <h3>Current Services</h3>
+                        <div class="service-list" id="servicesList"><div class="table-loading">Loading...</div></div>
+                    </div>
+                </div>
+
+                <!-- HOURS TAB -->
+                <div id="hours" class="tab">
+                    <h2 class="page-title">Business Hours</h2>
+                    <div class="card">
+                        <h3>Set Operating Hours</h3>
+                        <div class="hours-grid" id="hoursGrid"><div class="table-loading">Loading...</div></div>
+                        <button class="btn-primary" style="margin-top: 20px;" onclick="saveHours()">Save Hours</button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = 'https://script.google.com/macros/s/AKfycbxqX4GqZ35rb2AZdKtM6XJRAGih2SzJl20RVN9n6SGdN6--nZvOgoHxmjtHD0Mtfwe5Cg/exec';
+
+        // ===== CREDENTIALS (change before going live) =====
+        const CREDENTIALS = {
+            username: 'muva_admin',
+            password: 'MuvaStudio2024!'
+        };
+        const SESSION_KEY = 'muva_admin_session';
+        const MAX_ATTEMPTS = 5;
+        let failedAttempts = 0;
+        let lockoutUntil = null;
+
+        let allAppointments = [];
+        let allServices = [];
+        let allHours = {};
+        let deferredInstallPrompt = null;
+
+        // ===== PWA =====
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log('SW registered'))
+                    .catch(err => console.log('SW failed:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (!localStorage.getItem('adminInstallDismissed')) {
+                document.getElementById('installBanner').classList.add('show');
+            }
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            document.getElementById('installBanner').classList.remove('show');
+        });
+
+        function dismissInstall() {
+            document.getElementById('installBanner').classList.remove('show');
+            localStorage.setItem('adminInstallDismissed', 'true');
+        }
+
+        window.addEventListener('online', () => document.getElementById('offlineBadge').classList.remove('show'));
+        window.addEventListener('offline', () => document.getElementById('offlineBadge').classList.add('show'));
+
+        // ===== AUTH =====
+        function checkSession() {
+            const session = sessionStorage.getItem(SESSION_KEY);
+            if (session) {
+                const { user, expires } = JSON.parse(session);
+                if (Date.now() < expires) {
+                    showDashboard(user);
+                    return true;
+                } else {
+                    sessionStorage.removeItem(SESSION_KEY);
+                }
+            }
+            return false;
+        }
+
+        function login() {
+            // Check lockout
+            if (lockoutUntil && Date.now() < lockoutUntil) {
+                const remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
+                document.getElementById('loginError').textContent = `Too many attempts. Try again in ${remaining} seconds.`;
+                document.getElementById('loginError').classList.add('show');
+                return;
+            }
+
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+
+            if (!user || !pass) {
+                document.getElementById('loginError').textContent = 'Please enter username and password.';
+                document.getElementById('loginError').classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            // Simulate slight delay for security feel
+            setTimeout(() => {
+                if (user === CREDENTIALS.username && pass === CREDENTIALS.password) {
+                    // Success - create 8 hour session
+                    const session = { user, expires: Date.now() + (8 * 60 * 60 * 1000) };
+                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+                    failedAttempts = 0;
+                    lockoutUntil = null;
+                    document.getElementById('loginError').classList.remove('show');
+                    document.getElementById('loginPass').value = '';
+                    showDashboard(user);
+                } else {
+                    failedAttempts++;
+                    const remaining = MAX_ATTEMPTS - failedAttempts;
+
+                    if (failedAttempts >= MAX_ATTEMPTS) {
+                        lockoutUntil = Date.now() + (30 * 1000); // 30 second lockout
+                        document.getElementById('loginError').textContent = 'Too many failed attempts. Locked for 30 seconds.';
+                        document.getElementById('attemptsMsg').textContent = '';
+                    } else {
+                        document.getElementById('loginError').textContent = 'Incorrect username or password.';
+                        document.getElementById('attemptsMsg').textContent = `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining`;
+                    }
+
+                    document.getElementById('loginError').classList.add('show');
+                    document.getElementById('loginUser').classList.add('shake');
+                    document.getElementById('loginPass').value = '';
+                    setTimeout(() => document.getElementById('loginUser').classList.remove('shake'), 500);
+                }
+
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }, 600);
+        }
+
+        function showDashboard(user) {
+            document.getElementById('loginScreen').classList.remove('show');
+            document.getElementById('dashboardScreen').classList.add('show');
+            document.getElementById('welcomeUser').textContent = `Hi, ${user}`;
+            loadAll();
+        }
+
+        function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            sessionStorage.removeItem(SESSION_KEY);
+            document.getElementById('dashboardScreen').classList.remove('show');
+            document.getElementById('loginScreen').classList.add('show');
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('attemptsMsg').textContent = '';
+        }
+
+        // ===== API =====
+        async function api(action, data = {}) {
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, ...data })
+                });
+                return await res.json();
+            } catch(e) {
+                console.error('API error:', e);
+                return { success: false, error: e.message };
+            }
+        }
+
+        async function loadAll() {
+            const [aptsRes, svcRes, hoursRes] = await Promise.all([
+                api('getAppointments'),
+                api('getServices'),
+                api('getBusinessHours')
+            ]);
+            if (aptsRes.success) { allAppointments = aptsRes.appointments; renderDashboard(); renderAppointments(); }
+            if (svcRes.success) { allServices = svcRes.services; renderServices(); }
+            if (hoursRes.success) { allHours = hoursRes.businessHours; renderHours(); }
+        }
+
+        // ===== DASHBOARD =====
+        function renderDashboard() {
+            const pending = allAppointments.filter(a => a.status === 'pending').length;
+            const confirmed = allAppointments.filter(a => a.status === 'confirmed').length;
+            const revenue = allAppointments
+                .filter(a => a.status === 'confirmed' || a.status === 'completed')
+                .reduce((sum, a) => sum + (parseFloat(a.total) || 0), 0);
+            const clients = new Set(allAppointments.map(a => a.email)).size;
+
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statConfirmed').textContent = confirmed;
+            document.getElementById('statRevenue').textContent = '$' + revenue.toLocaleString();
+            document.getElementById('statClients').textContent = clients;
+
+            const recent = [...allAppointments].reverse().slice(0, 10);
+            document.getElementById('dashboardRows').innerHTML = recent.length
+                ? renderRows(recent)
+                : '<div class="table-empty">No appointments yet</div>';
+        }
+
+        function renderAppointments() {
+            const sorted = [...allAppointments].reverse();
+            document.getElementById('appointmentsRows').innerHTML = sorted.length
+                ? renderRows(sorted)
+                : '<div class="table-empty">No appointments yet</div>';
+        }
+
+        function renderRows(apts) {
+            return apts.map(apt => `
+                <div class="table-row">
+                    <div>
+                        <strong style="font-size:13px;">${apt.clientName}</strong>
+                        <div style="font-size:11px; color:#6b6b6b; margin-top:2px;">${apt.email}</div>
+                    </div>
+                    <div style="font-size:12px;">${apt.services}</div>
+                    <div style="font-size:12px;">${apt.date}<br><span style="color:#6b6b6b;">${apt.time}</span></div>
+                    <div><span class="status status-${apt.status}">${apt.status}</span></div>
+                    <div class="actions">
+                        ${apt.status === 'pending' ? `
+                            <button class="btn btn-yes" onclick="updateStatus('${apt.id}', 'confirmed')">✓</button>
+                            <button class="btn btn-no" onclick="updateStatus('${apt.id}', 'cancelled')">✕</button>
+                        ` : apt.status === 'confirmed' ? `
+                            <button class="btn btn-no" onclick="updateStatus('${apt.id}', 'cancelled')">Cancel</button>
+                        ` : '<span style="color:#6b6b6b; font-size:12px;">—</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            const label = status === 'confirmed' ? 'confirm' : 'cancel';
+            if (!confirm(`Are you sure you want to ${label} this appointment?`)) return;
+
+            const result = await api('updateAppointment', { id, updates: { status } });
+
+            if (result.success) {
+                const apt = allAppointments.find(a => String(a.id) === String(id));
+                if (apt) apt.status = status;
+                renderDashboard();
+                renderAppointments();
+                showToast(`✓ Appointment ${status}. Email sent to client.`);
+            } else {
+                showToast('Failed to update. Try again.', 'error');
+            }
+        }
+
+        // ===== SERVICES =====
+        function renderServices() {
+            const list = document.getElementById('servicesList');
+            if (!allServices.length) {
+                list.innerHTML = '<p style="color:#6b6b6b; text-align:center; padding:20px;">No services yet. Add one above.</p>';
+                return;
+            }
+            list.innerHTML = allServices.map((s, i) => `
+                <div class="service-item">
+                    <div>
+                        <strong>${s.name}</strong>
+                        <p>$${s.price} &bull; ${s.duration} minutes</p>
+                    </div>
+                    <button class="btn-remove" onclick="removeService(${i})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        async function addService() {
+            const name = document.getElementById('srvName').value.trim();
+            const price = document.getElementById('srvPrice').value.trim();
+            const dur = document.getElementById('srvDur').value.trim();
+            if (!name || !price || !dur) { showToast('Please fill all fields', 'error'); return; }
+
+            const result = await api('addService', { service: { name, price: parseFloat(price), duration: parseInt(dur) } });
+            if (result.success) {
+                allServices.push({ name, price: parseFloat(price), duration: parseInt(dur) });
+                renderServices();
+                document.getElementById('srvName').value = '';
+                document.getElementById('srvPrice').value = '';
+                document.getElementById('srvDur').value = '';
+                showToast(`✓ "${name}" added`);
+            } else {
+                showToast('Failed to add service', 'error');
+            }
+        }
+
+        async function removeService(index) {
+            const name = allServices[index].name;
+            if (!confirm(`Remove "${name}"?`)) return;
+            const result = await api('removeService', { index });
+            if (result.success) {
+                allServices.splice(index, 1);
+                renderServices();
+                showToast(`✓ "${name}" removed`);
+            } else {
+                showToast('Failed to remove', 'error');
+            }
+        }
+
+        // ===== HOURS =====
+        function renderHours() {
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+            document.getElementById('hoursGrid').innerHTML = days.map(day => {
+                const h = allHours[day] || { open: '09:00', close: '18:00', closed: false };
+                const isClosed = String(h.closed).toLowerCase() === 'true';
+                return `
+                    <div class="hour-item">
+                        <label>${day}</label>
+                        <div class="hour-inputs">
+                            <input type="time" id="open-${day}" value="${h.open || '09:00'}" ${isClosed ? 'disabled style="opacity:0.4"' : ''}>
+                            <span>to</span>
+                            <input type="time" id="close-${day}" value="${h.close || '18:00'}" ${isClosed ? 'disabled style="opacity:0.4"' : ''}>
+                        </div>
+                        <div class="closed-row">
+                            <input type="checkbox" id="closed-${day}" ${isClosed ? 'checked' : ''} onchange="toggleDay('${day}')">
+                            <label for="closed-${day}">Closed</label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDay(day) {
+            const isClosed = document.getElementById(`closed-${day}`).checked;
+            const openInput = document.getElementById(`open-${day}`);
+            const closeInput = document.getElementById(`close-${day}`);
+            openInput.disabled = isClosed;
+            closeInput.disabled = isClosed;
+            openInput.style.opacity = isClosed ? '0.4' : '1';
+            closeInput.style.opacity = isClosed ? '0.4' : '1';
+        }
+
+        async function saveHours() {
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+            const hours = {};
+            days.forEach(day => {
+                hours[day] = {
+                    open: document.getElementById(`open-${day}`).value,
+                    close: document.getElementById(`close-${day}`).value,
+                    closed: document.getElementById(`closed-${day}`).checked
+                };
+            });
+            const result = await api('updateBusinessHours', { hours });
+            if (result.success) { allHours = hours; showToast('✓ Business hours saved!'); }
+            else showToast('Failed to save hours', 'error');
+        }
+
+        // ===== NAVIGATION =====
+        function switchTab(name, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // ===== TOAST =====
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ===== INIT =====
+        checkSession();
+    </script>
+</body>
+</html>
