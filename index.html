@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muva Studio - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #f5f1ed; color: #2d2a28; }
+        .header { background: linear-gradient(135deg, #d4a5a5, #9b7fa1); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 28px; font-weight: 700; }
+        .logout { background: rgba(255,255,255,0.25); color: white; border: 1px solid white; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; }
+        .layout { display: grid; grid-template-columns: 200px 1fr; min-height: calc(100vh - 70px); }
+        .sidebar { background: white; border-right: 1px solid #e0e0e0; padding: 20px 0; }
+        .nav { list-style: none; }
+        .nav a { display: block; padding: 14px 20px; color: #2d2a28; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
+        .nav a:hover { background: #f5f1ed; }
+        .nav a.active { background: #d4a5a5; color: white; border-left: 4px solid #a67878; padding-left: 16px; }
+        .content { padding: 30px; overflow-y: auto; }
+        .title { font-size: 32px; margin-bottom: 24px; color: #d4a5a5; font-weight: 700; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .stat { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+        .stat-num { font-size: 36px; font-weight: 700; color: #d4a5a5; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: #6b6b6b; text-transform: uppercase; letter-spacing: 1px; }
+        .table { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 30px; }
+        .table-head { background: #d4a5a5; color: white; padding: 16px 20px; display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 1.2fr; gap: 12px; font-weight: 600; font-size: 13px; }
+        .table-row { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; display: grid; grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 1.2fr; gap: 12px; align-items: center; font-size: 13px; }
+        .table-row:hover { background: #f5f1ed; }
+        .table-row:last-child { border: none; }
+        .empty { padding: 40px; text-align: center; color: #6b6b6b; }
+        .status { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: rgba(255,183,77,0.2); color: #f57f17; }
+        .status-confirmed { background: rgba(76,175,80,0.2); color: #388e3c; }
+        .status-completed { background: rgba(103,141,197,0.2); color: #1565c0; }
+        .status-cancelled { background: rgba(244,67,54,0.2); color: #d32f2f; }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: 'Poppins', sans-serif; min-height: 30px; }
+        .btn-yes { background: #4caf50; color: white; }
+        .btn-yes:hover { background: #388e3c; }
+        .btn-no { background: #f44336; color: white; }
+        .btn-no:hover { background: #d32f2f; }
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .card h3 { font-size: 18px; color: #d4a5a5; margin-bottom: 16px; font-weight: 700; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
+        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; }
+        .form-group input:focus { outline: none; border-color: #d4a5a5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-primary { background: #d4a5a5; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; }
+        .btn-primary:hover { background: #a67878; }
+        .service-list { display: grid; gap: 10px; }
+        .service-item { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; gap: 12px; }
+        .service-item:hover { background: #f5f1ed; }
+        .service-item strong { display: block; color: #d4a5a5; margin-bottom: 2px; font-size: 14px; }
+        .service-item p { font-size: 12px; color: #6b6b6b; }
+        .btn-remove { background: #f44336; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+        .btn-remove:hover { background: #d32f2f; }
+        .hours-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .hour-item { padding: 14px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .hour-item label { font-weight: 600; margin-bottom: 8px; display: block; font-size: 13px; }
+        .hour-inputs { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+        .hour-inputs input { flex: 1; padding: 6px 8px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 12px; min-width: 0; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: white; border-left: 4px solid #4caf50; padding: 14px 20px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; font-size: 14px; z-index: 1000; max-width: 320px; }
+        .toast.error { border-left-color: #f44336; }
+        .toast.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .loading { text-align: center; padding: 40px; color: #6b6b6b; }
+        @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } .table-head, .table-row { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Muva Studio Admin</h1>
+        <button class="logout" onclick="if(confirm('Logout?')) window.location.reload()">Logout</button>
+    </div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <ul class="nav">
+                <li><a class="active" onclick="switchTab('dashboard', this)">📊 Dashboard</a></li>
+                <li><a onclick="switchTab('appointments', this)">📅 Appointments</a></li>
+                <li><a onclick="switchTab('services', this)">💄 Services</a></li>
+                <li><a onclick="switchTab('hours', this)">⏰ Hours</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+
+            <div id="dashboard" class="tab active">
+                <h2 class="title">Dashboard</h2>
+                <div class="stats">
+                    <div class="stat"><div class="stat-num" id="statPending">-</div><div class="stat-label">Pending</div></div>
+                    <div class="stat"><div class="stat-num" id="statConfirmed">-</div><div class="stat-label">Confirmed</div></div>
+                    <div class="stat"><div class="stat-num" id="statRevenue">-</div><div class="stat-label">Revenue</div></div>
+                    <div class="stat"><div class="stat-num" id="statClients">-</div><div class="stat-label">Clients</div></div>
+                </div>
+                <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">Recent Bookings</h3>
+                <div class="table">
+                    <div class="table-head">
+                        <div>Client</div><div>Services</div><div>Date & Time</div><div>Status</div><div>Action</div>
+                    </div>
+                    <div id="dashboardRows"><div class="loading">Loading appointments...</div></div>
+                </div>
+            </div>
+
+            <div id="appointments" class="tab">
+                <h2 class="title">All Appointments</h2>
+                <div class="table">
+                    <div class="table-head">
+                        <div>Client</div><div>Services</div><div>Date & Time</div><div>Status</div><div>Action</div>
+                    </div>
+                    <div id="appointmentsRows"><div class="loading">Loading...</div></div>
+                </div>
+            </div>
+
+            <div id="services" class="tab">
+                <h2 class="title">Manage Services</h2>
+                <div class="card">
+                    <h3>Add New Service</h3>
+                    <div class="form-group">
+                        <label>Service Name</label>
+                        <input type="text" id="srvName" placeholder="e.g., Bridal Makeup">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Price ($)</label>
+                            <input type="number" id="srvPrice" placeholder="150">
+                        </div>
+                        <div class="form-group">
+                            <label>Duration (min)</label>
+                            <input type="number" id="srvDur" placeholder="120">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="addService()">Add Service</button>
+                </div>
+                <div class="card">
+                    <h3>Current Services</h3>
+                    <div class="service-list" id="servicesList"><div class="loading">Loading...</div></div>
+                </div>
+            </div>
+
+            <div id="hours" class="tab">
+                <h2 class="title">Business Hours</h2>
+                <div class="card">
+                    <h3>Set Operating Hours</h3>
+                    <div class="hours-grid" id="hoursGrid"><div class="loading">Loading...</div></div>
+                    <button class="btn-primary" style="margin-top: 20px;" onclick="saveHours()">Save Hours</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = 'https://script.google.com/macros/s/AKfycbxqX4GqZ35rb2AZdKtM6XJRAGih2SzJl20RVN9n6SGdN6--nZvOgoHxmjtHD0Mtfwe5Cg/exec';
+
+        let allAppointments = [];
+        let allServices = [];
+        let allHours = {};
+
+        async function api(action, data = {}) {
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, ...data })
+                });
+                return await res.json();
+            } catch(e) {
+                console.error('API error:', e);
+                return { success: false, error: e.message };
+            }
+        }
+
+        async function loadAll() {
+            const [aptsRes, svcRes, hoursRes] = await Promise.all([
+                api('getAppointments'),
+                api('getServices'),
+                api('getBusinessHours')
+            ]);
+
+            if (aptsRes.success) {
+                allAppointments = aptsRes.appointments;
+                renderDashboard();
+                renderAppointments();
+            }
+            if (svcRes.success) {
+                allServices = svcRes.services;
+                renderServices();
+            }
+            if (hoursRes.success) {
+                allHours = hoursRes.businessHours;
+                renderHours();
+            }
+        }
+
+        function renderDashboard() {
+            const pending = allAppointments.filter(a => a.status === 'pending').length;
+            const confirmed = allAppointments.filter(a => a.status === 'confirmed').length;
+            const revenue = allAppointments
+                .filter(a => a.status === 'confirmed' || a.status === 'completed')
+                .reduce((sum, a) => sum + (parseFloat(a.total) || 0), 0);
+            const clients = new Set(allAppointments.map(a => a.email)).size;
+
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statConfirmed').textContent = confirmed;
+            document.getElementById('statRevenue').textContent = '$' + revenue.toLocaleString();
+            document.getElementById('statClients').textContent = clients;
+
+            const recent = [...allAppointments].slice(-10).reverse();
+            document.getElementById('dashboardRows').innerHTML = renderRows(recent) || '<div class="empty">No appointments yet</div>';
+        }
+
+        function renderAppointments() {
+            const sorted = [...allAppointments].reverse();
+            document.getElementById('appointmentsRows').innerHTML = renderRows(sorted) || '<div class="empty">No appointments yet</div>';
+        }
+
+        function renderRows(apts) {
+            return apts.map(apt => `
+                <div class="table-row">
+                    <div><strong>${apt.clientName}</strong><br><span style="font-size:11px;color:#6b6b6b;">${apt.email}</span></div>
+                    <div>${apt.services}</div>
+                    <div>${apt.date}<br>${apt.time}</div>
+                    <div><span class="status status-${apt.status}">${apt.status}</span></div>
+                    <div class="actions">
+                        ${apt.status === 'pending' ? `
+                            <button class="btn btn-yes" onclick="updateStatus('${apt.id}', 'confirmed')">✓ Confirm</button>
+                            <button class="btn btn-no" onclick="updateStatus('${apt.id}', 'cancelled')">✕ Reject</button>
+                        ` : apt.status === 'confirmed' ? `
+                            <button class="btn btn-no" onclick="updateStatus('${apt.id}', 'cancelled')">Cancel</button>
+                        ` : '—'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            const label = status === 'confirmed' ? 'Confirm' : 'Cancel';
+            if (!confirm(`${label} this appointment?`)) return;
+
+            const result = await api('updateAppointment', {
+                id: id,
+                updates: { status: status }
+            });
+
+            if (result.success) {
+                const apt = allAppointments.find(a => String(a.id) === String(id));
+                if (apt) apt.status = status;
+                renderDashboard();
+                renderAppointments();
+                showToast(`✓ Appointment ${status}. Email sent to client.`);
+            } else {
+                showToast('Failed to update. Try again.', 'error');
+            }
+        }
+
+        function renderServices() {
+            const list = document.getElementById('servicesList');
+            if (!allServices.length) {
+                list.innerHTML = '<p style="color:#6b6b6b; text-align:center; padding:20px;">No services yet.</p>';
+                return;
+            }
+            list.innerHTML = allServices.map((s, i) => `
+                <div class="service-item">
+                    <div>
+                        <strong>${s.name}</strong>
+                        <p>$${s.price} &bull; ${s.duration} min</p>
+                    </div>
+                    <button class="btn-remove" onclick="removeService(${i})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        async function addService() {
+            const name = document.getElementById('srvName').value.trim();
+            const price = document.getElementById('srvPrice').value.trim();
+            const dur = document.getElementById('srvDur').value.trim();
+
+            if (!name || !price || !dur) { showToast('Fill all fields', 'error'); return; }
+
+            const result = await api('addService', { service: { name, price: parseFloat(price), duration: parseInt(dur) } });
+
+            if (result.success) {
+                allServices.push({ name, price: parseFloat(price), duration: parseInt(dur) });
+                renderServices();
+                document.getElementById('srvName').value = '';
+                document.getElementById('srvPrice').value = '';
+                document.getElementById('srvDur').value = '';
+                showToast(`✓ "${name}" added`);
+            } else {
+                showToast('Failed to add service', 'error');
+            }
+        }
+
+        async function removeService(index) {
+            const name = allServices[index].name;
+            if (!confirm(`Remove "${name}"?`)) return;
+
+            const result = await api('removeService', { index });
+
+            if (result.success) {
+                allServices.splice(index, 1);
+                renderServices();
+                showToast(`✓ "${name}" removed`);
+            } else {
+                showToast('Failed to remove', 'error');
+            }
+        }
+
+        function renderHours() {
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+            document.getElementById('hoursGrid').innerHTML = days.map(day => {
+                const h = allHours[day] || { open: '09:00', close: '18:00', closed: false };
+                const isClosed = h.closed === true || h.closed === 'TRUE';
+                return `
+                    <div class="hour-item">
+                        <label>${day}</label>
+                        <div class="hour-inputs">
+                            <input type="time" id="open-${day}" value="${h.open || '09:00'}" ${isClosed ? 'disabled' : ''}>
+                            <span>to</span>
+                            <input type="time" id="close-${day}" value="${h.close || '18:00'}" ${isClosed ? 'disabled' : ''}>
+                        </div>
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="closed-${day}" ${isClosed ? 'checked' : ''} onchange="toggleDay('${day}')">
+                            <label for="closed-${day}" style="font-size: 12px; font-weight: 400; margin: 0;">Closed</label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDay(day) {
+            const isClosed = document.getElementById(`closed-${day}`).checked;
+            document.getElementById(`open-${day}`).disabled = isClosed;
+            document.getElementById(`close-${day}`).disabled = isClosed;
+        }
+
+        async function saveHours() {
+            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+            const hours = {};
+            days.forEach(day => {
+                hours[day] = {
+                    open: document.getElementById(`open-${day}`).value,
+                    close: document.getElementById(`close-${day}`).value,
+                    closed: document.getElementById(`closed-${day}`).checked
+                };
+            });
+
+            const result = await api('updateBusinessHours', { hours });
+            if (result.success) {
+                allHours = hours;
+                showToast('✓ Business hours saved!');
+            } else {
+                showToast('Failed to save hours', 'error');
+            }
+        }
+
+        function switchTab(name, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        loadAll();
+    </script>
+</body>
+</html>
