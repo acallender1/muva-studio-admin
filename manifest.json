@@ -2,23 +2,36 @@
     "name": "Muva Studio Admin",
     "short_name": "Muva Admin",
     "description": "Muva Studio owner dashboard",
-    "start_url": "/",
+    "start_url": "/muva-studio-admin/",
+    "scope": "/muva-studio-admin/",
     "display": "standalone",
     "background_color": "#f5f1ed",
     "theme_color": "#d4a5a5",
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%236b4e71' width='192' height='192' rx='40'/%3E%3Ctext x='96' y='130' font-size='100' fill='white' text-anchor='middle' font-family='serif' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E",
+            "src": "/muva-studio-admin/icon-192.png",
             "sizes": "192x192",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%236b4e71' width='512' height='512' rx='100'/%3E%3Ctext x='256' y='360' font-size='280' fill='white' text-anchor='middle' font-family='serif' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E",
+            "src": "/muva-studio-admin/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/muva-studio-admin/icon-512.png",
             "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/muva-studio-admin/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "categories": ["business", "productivity"]
