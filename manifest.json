@@ -1,12 +1,12 @@
 {
-    "name": "Muva Studio Admin",
-    "short_name": "Muva Admin",
-    "description": "Muva Studio owner dashboard",
+    "name": "Mika's Beauty World Admin",
+    "short_name": "Mika's Admin",
+    "description": "Mika's Beauty World owner dashboard",
     "start_url": "/muva-studio-admin/",
     "scope": "/muva-studio-admin/",
     "display": "standalone",
-    "background_color": "#f5f1ed",
-    "theme_color": "#d4a5a5",
+    "background_color": "#fdf5f5",
+    "theme_color": "#AF1B3F",
     "orientation": "portrait-primary",
     "icons": [
         {
