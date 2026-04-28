@@ -1,18 +1,18 @@
-const CACHE = 'muva-admin-v3';
+const CACHE = 'muva-admin-v4';
 const ASSETS = [
-    '/muva-studio-admin/',
-    '/muva-studio-admin/index.html',
-    '/muva-studio-admin/icon-192.png',
-    '/muva-studio-admin/icon-512.png'
+    '/',
+    '/index.html',
+    '/icon192.png',
+    '/icon512.png'
 ];
-
+ 
 self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(CACHE).then(cache => cache.addAll(ASSETS))
     );
     self.skipWaiting();
 });
-
+ 
 self.addEventListener('activate', e => {
     e.waitUntil(
         caches.keys().then(keys =>
@@ -21,9 +21,9 @@ self.addEventListener('activate', e => {
     );
     self.clients.claim();
 });
-
+ 
 self.addEventListener('fetch', e => {
-    if (e.request.url.includes('script.google.com') || 
+    if (e.request.url.includes('script.google.com') ||
         e.request.url.includes('fonts.googleapis.com')) {
         return fetch(e.request).catch(() => {});
     }
@@ -34,6 +34,7 @@ self.addEventListener('fetch', e => {
                 caches.open(CACHE).then(cache => cache.put(e.request, clone));
                 return res;
             });
-        }).catch(() => caches.match('/muva-studio-admin/index.html'))
+        }).catch(() => caches.match('/index.html'))
     );
 });
+ 
